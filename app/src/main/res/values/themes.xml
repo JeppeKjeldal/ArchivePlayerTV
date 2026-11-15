@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.ArchivePlayerTV" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
