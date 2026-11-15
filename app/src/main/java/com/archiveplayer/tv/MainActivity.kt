@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.archiveplayer.tv.features.login.LoginScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,14 +31,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ArchivePlayerApp() {
-    // NavController styrer navigationen
     val navController = rememberNavController()
 
-    // NavHost definerer alle skærme (routes)
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "login"
     ) {
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = { navController.navigate("home") }
+            )
+        }
+
         composable("home") {
             HomeScreen(
                 onButtonClick = { navController.navigate("detail") }
