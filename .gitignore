@@ -13,3 +13,15 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Log files
+*.log
+
+# Built application files
+*.apk
+*.aab
+
+# Secrets and local keys
+secrets.properties
+*.jks
+*.keystore
