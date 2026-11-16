@@ -30,6 +30,16 @@ fun LoginScreen(
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
 
+    fun performLogin() {
+        if (email.isBlank() || password.isBlank()) {
+            errorMessage = "Please fill in all fields"
+            return
+        }
+
+        errorMessage = null
+        onLoginSuccess()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -43,7 +53,7 @@ fun LoginScreen(
                 .padding(32.dp)
         ) {
             Text(
-                text = "ArchivePlayer",
+                text = "ArchivePlayer TV",
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White
             )
@@ -53,7 +63,7 @@ fun LoginScreen(
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text("Email (any for now)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -72,7 +82,7 @@ fun LoginScreen(
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Password (any for now)") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -80,14 +90,7 @@ fun LoginScreen(
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = {
-                        if (email.isNotBlank() && password.isNotBlank()) {
-                            errorMessage = null
-                            onLoginSuccess()
-                        } else {
-                            errorMessage = "Please fill in all fields"
-                        }
-                    }
+                    onDone = { performLogin() }
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -105,17 +108,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = {
-                    if (email.isBlank() || password.isBlank()) {
-                        errorMessage = "Please fill in all fields"
-                    } else {
-                        errorMessage = null
-                        onLoginSuccess()
-                    }
-                },
+                onClick = { performLogin() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Text("Start Watching")
             }
         }
     }
