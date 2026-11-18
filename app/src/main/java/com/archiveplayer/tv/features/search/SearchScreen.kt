@@ -16,12 +16,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import coil.compose.AsyncImage
 import com.archiveplayer.tv.data.archive.ArchiveItem
 import com.archiveplayer.tv.data.network.RetrofitClient
 import kotlinx.coroutines.launch
@@ -179,10 +181,13 @@ fun SearchResultItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
+        AsyncImage(
+            model = item.thumbnailUrl,
+            contentDescription = item.title,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(48.dp)
-                .background(Color.Gray)
+                .background(Color.DarkGray)
         )
 
         Spacer(modifier = Modifier.width(16.dp))
