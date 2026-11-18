@@ -1,6 +1,5 @@
 package com.archiveplayer.tv.data.archive
 
-// Response fra Archive.org advanced search API
 data class ArchiveSearchResponse(
     val response: ArchiveResponse?
 )
@@ -18,7 +17,6 @@ data class ArchiveDoc(
     val description: String?
 )
 
-// Forenklet model til UI-brug
 data class ArchiveItem(
     val identifier: String,
     val title: String,

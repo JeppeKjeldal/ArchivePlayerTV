@@ -55,9 +55,9 @@ object RetrofitClient {
         init(null, arrayOf<TrustManager>(unsafeTrustManager), SecureRandom())
     }
 
-    private val okHttpClient = OkHttpClient.Builder()
+    val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .sslSocketFactory(sslContext.socketFactory, unsafeTrustManager)
-        .hostnameVerifier { _, _ -> true } // Accept any hostname
+        .hostnameVerifier { _, _ -> true }
         .cookieJar(cookieJar)
         .addInterceptor(loggingInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)
