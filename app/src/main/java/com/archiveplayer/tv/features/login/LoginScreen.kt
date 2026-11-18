@@ -20,7 +20,7 @@ import androidx.tv.material3.Text
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit // Ændret: Modtager nu profilnavnet som en String
+    onLoginSuccess: (String) -> Unit
 ) {
     var profileName by remember { mutableStateOf("Gæst") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -35,7 +35,7 @@ fun LoginScreen(
         }
 
         errorMessage = null
-        onLoginSuccess(name) // Sender det gyldige navn videre
+        onLoginSuccess(name)
     }
 
     Box(
@@ -70,7 +70,7 @@ fun LoginScreen(
                 value = profileName,
                 onValueChange = {
                     profileName = it
-                    errorMessage = null // Fjern fejlmeddelelse så snart brugeren skriver
+                    errorMessage = null
                 },
                 label = { Text("Profilnavn") },
                 singleLine = true,
@@ -106,7 +106,6 @@ fun LoginScreen(
         }
     }
 
-    // Sæt fokus på tekstfeltet automatisk når skærmen åbnes
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
