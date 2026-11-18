@@ -13,7 +13,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
@@ -21,23 +20,22 @@ import androidx.tv.material3.Text
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (String) -> Unit // Ændret: Modtager nu profilnavnet som en String
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var profileName by remember { mutableStateOf("Gæst") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val emailFocusRequester = remember { FocusRequester() }
-    val passwordFocusRequester = remember { FocusRequester() }
+    val focusRequester = remember { FocusRequester() }
 
-    fun performLogin() {
-        if (email.isBlank() || password.isBlank()) {
-            errorMessage = "Please fill in all fields"
+    fun handleStart() {
+        val name = profileName.trim()
+        if (name.isBlank()) {
+            errorMessage = "Profilnavn må ikke være tomt"
             return
         }
 
         errorMessage = null
-        onLoginSuccess()
+        onLoginSuccess(name) // Sender det gyldige navn videre
     }
 
     Box(
@@ -58,65 +56,58 @@ fun LoginScreen(
                 color = Color.White
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Velkommen! Vælg et profilnavn.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.LightGray
+            )
+
             Spacer(modifier = Modifier.height(48.dp))
 
             TextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email (any for now)") },
+                value = profileName,
+                onValueChange = {
+                    profileName = it
+                    errorMessage = null // Fjern fejlmeddelelse så snart brugeren skriver
+                },
+                label = { Text("Profilnavn") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { passwordFocusRequester.requestFocus() }
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(emailFocusRequester)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password (any for now)") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = { performLogin() }
+                    onDone = { handleStart() }
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(passwordFocusRequester)
+                    .focusRequester(focusRequester)
             )
 
             if (errorMessage != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = errorMessage!!,
-                    color = Color.Red
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { performLogin() },
+                onClick = { handleStart() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Start Watching")
+                Text("Start Afspilning")
             }
         }
     }
 
+    // Sæt fokus på tekstfeltet automatisk når skærmen åbnes
     LaunchedEffect(Unit) {
-        emailFocusRequester.requestFocus()
+        focusRequester.requestFocus()
     }
 }

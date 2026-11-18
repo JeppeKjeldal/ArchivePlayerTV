@@ -16,7 +16,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.archiveplayer.tv.data.archive.ArchiveItem
 import com.archiveplayer.tv.features.login.LoginScreen
+import com.archiveplayer.tv.features.search.SearchScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,18 +41,26 @@ fun ArchivePlayerApp() {
     ) {
         composable("login") {
             LoginScreen(
-                onLoginSuccess = { navController.navigate("home") }
+                onLoginSuccess = { profileName ->
+                    navController.navigate("search")
+                }
             )
         }
 
-        composable("home") {
-            HomeScreen(
-                onButtonClick = { navController.navigate("detail") }
+        composable("search") {
+            SearchScreen(
+                onItemSelected = { item ->
+                    // For nu navigerer vi til detail med item.identifier
+                    // Senere kan vi sende hele item-objektet
+                    navController.navigate("detail/${item.identifier}")
+                }
             )
         }
 
-        composable("detail") {
+        composable("detail/{itemId}") { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId") ?: "Unknown"
             DetailScreen(
+                itemId = itemId,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -58,32 +68,10 @@ fun ArchivePlayerApp() {
 }
 
 @Composable
-fun HomeScreen(onButtonClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.DarkGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Home Screen",
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = onButtonClick) {
-                Text("Go to Detail")
-            }
-        }
-    }
-}
-
-@Composable
-fun DetailScreen(onBackClick: () -> Unit) {
+fun DetailScreen(
+    itemId: String,
+    onBackClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -95,10 +83,19 @@ fun DetailScreen(onBackClick: () -> Unit) {
         ) {
             Text(
                 text = "Detail Screen",
+                style = MaterialTheme.typography.headlineLarge,
                 color = Color.White
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Item ID: $itemId",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.LightGray
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(onClick = onBackClick) {
                 Text("Go Back")
