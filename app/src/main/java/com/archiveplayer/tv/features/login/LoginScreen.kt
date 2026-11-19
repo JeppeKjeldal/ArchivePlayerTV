@@ -14,12 +14,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 
 @Composable
 fun LoginScreen(
+    loginViewModel: LoginViewModel = viewModel(),
     onLoginSuccess: (String) -> Unit
 ) {
     var profileName by remember { mutableStateOf("Gæst") }
@@ -35,6 +37,7 @@ fun LoginScreen(
         }
 
         errorMessage = null
+        loginViewModel.saveProfileName(name)
         onLoginSuccess(name)
     }
 

@@ -3,14 +3,16 @@ package com.archiveplayer.tv
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.MaterialTheme
-import com.archiveplayer.tv.features.detail.DetailScreen
+import com.archiveplayer.tv.features.library.LibraryScreen
+import com.archiveplayer.tv.features.library.LibraryViewModel
 import com.archiveplayer.tv.features.login.LoginScreen
-import com.archiveplayer.tv.features.search.SearchScreen
+import com.archiveplayer.tv.features.login.LoginViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +28,18 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ArchivePlayerApp() {
     val navController = rememberNavController()
+    val loginViewModel: LoginViewModel = viewModel()
+    val libraryViewModel: LibraryViewModel = viewModel()
+
+    val profile by libraryViewModel.userProfile.collectAsState(initial = null)
+
+    LaunchedEffect(profile) {
+        if (profile != null) {
+            navController.navigate("library") {
+                popUpTo("login") { inclusive = true } // Fjern login fra stacken
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -33,14 +47,29 @@ fun ArchivePlayerApp() {
     ) {
         composable("login") {
             LoginScreen(
-                onLoginSuccess = { profileName ->
+                loginViewModel = loginViewModel,
+                onLoginSuccess = {
+                    navController.navigate("library") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("library") {
+            LibraryScreen(
+                libraryViewModel = libraryViewModel,
+                onNavigateToAddSource = {
                     navController.navigate("search")
+                },
+                onItemClicked = { itemId ->
+                    navController.navigate("detail/$itemId")
                 }
             )
         }
 
         composable("search") {
-            SearchScreen(
+            com.archiveplayer.tv.features.search.SearchScreen(
                 onItemSelected = { item ->
                     navController.navigate("detail/${item.identifier}")
                 }
@@ -49,7 +78,7 @@ fun ArchivePlayerApp() {
 
         composable("detail/{itemId}") { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId") ?: "Unknown"
-            DetailScreen(
+            com.archiveplayer.tv.features.detail.DetailScreen(
                 itemId = itemId,
                 onBackClick = { navController.popBackStack() }
             )
