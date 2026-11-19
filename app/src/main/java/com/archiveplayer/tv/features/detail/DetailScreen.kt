@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetailScreen(
     itemId: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onAddToLibrary: (String) -> Unit
 ) {
     var details by remember { mutableStateOf<ArchiveDetails?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -110,26 +111,26 @@ fun DetailScreen(
 
                             Row {
                                 Button(
-                                    onClick = { /* TODO: Add to library */ },
+                                    onClick = { onAddToLibrary(item.identifier) },
                                     modifier = Modifier.padding(end = 16.dp)
                                 ) {
-                                    Text("Tilføj til bibliotek")
+                                    Text("Add to library")
                                 }
 
                                 if (item.videoFiles.isNotEmpty()) {
                                     Button(onClick = { /* TODO: Play video */ }) {
-                                        Text("Afspil (${item.videoFiles.first()})")
+                                        Text("Play")
                                     }
                                 } else {
-                                    Text("Ingen understøttede videofiler fundet", color = Color.Red)
+                                    Text("No supported video-files found", color = Color.Red)
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            Text("DEBUG: Fundet ${item.videoFiles.size} videofil(er)", color = Color.Yellow)
+                            Text("DEBUG: Found ${item.videoFiles.size} videofile(s)", color = Color.Yellow)
                             if (item.allFiles.isNotEmpty()) {
-                                Text("DEBUG: Første filer i metadata: ${item.allFiles.joinToString(", ")}", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                                Text("DEBUG: First files in metadata: ${item.allFiles.joinToString(", ")}", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

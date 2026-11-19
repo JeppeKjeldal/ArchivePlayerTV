@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.MaterialTheme
+import com.archiveplayer.tv.features.add.AddToLibraryScreen
 import com.archiveplayer.tv.features.library.LibraryScreen
 import com.archiveplayer.tv.features.library.LibraryViewModel
 import com.archiveplayer.tv.features.login.LoginScreen
@@ -36,7 +37,7 @@ fun ArchivePlayerApp() {
     LaunchedEffect(profile) {
         if (profile != null) {
             navController.navigate("library") {
-                popUpTo("login") { inclusive = true } // Fjern login fra stacken
+                popUpTo("login") { inclusive = true }
             }
         }
     }
@@ -80,7 +81,23 @@ fun ArchivePlayerApp() {
             val itemId = backStackEntry.arguments?.getString("itemId") ?: "Unknown"
             com.archiveplayer.tv.features.detail.DetailScreen(
                 itemId = itemId,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onAddToLibrary = { identifier ->
+                    navController.navigate("add_to_library/$identifier")
+                }
+            )
+        }
+
+        composable("add_to_library/{identifier}") { backStackEntry ->
+            val identifier = backStackEntry.arguments?.getString("identifier") ?: ""
+            AddToLibraryScreen(
+                identifier = identifier,
+                onSaved = {
+                    navController.navigate("library") {
+                        popUpTo("library") { inclusive = true }
+                    }
+                },
+                onCancel = { navController.popBackStack() }
             )
         }
     }
