@@ -63,8 +63,8 @@ fun ArchivePlayerApp() {
                 onNavigateToAddSource = {
                     navController.navigate("search")
                 },
-                onItemClicked = { itemId ->
-                    navController.navigate("detail/$itemId")
+                onItemClicked = { archiveIdentifier ->
+                    navController.navigate("detail/$archiveIdentifier")
                 }
             )
         }
