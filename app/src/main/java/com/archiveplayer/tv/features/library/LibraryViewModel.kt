@@ -19,4 +19,30 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     val allMediaItems: Flow<List<MediaItemEntity>> = app.mediaRepository.getAllMediaItems()
 
     val categories: Flow<List<String>> = app.mediaRepository.getAllCategories()
+
+    fun addTestData() {
+        viewModelScope.launch {
+            val testItems = listOf(
+                MediaItemEntity(
+                    archiveIdentifier = "spas-2012",
+                    title = "Mick Øgendahl - Spas",
+                    description = "En test film fra Archive.org",
+                    thumbnailUrl = "https://archive.org/services/img/spas-2012",
+                    categoryName = "Stand-Up Comedy"
+                ),
+                MediaItemEntity(
+                    archiveIdentifier = "timon-og-pumba-dktale",
+                    title = "Timon og Pumba (DK tale)",
+                    description = "En test serie fra Archive.org",
+                    thumbnailUrl = "https://archive.org/services/img/timon-og-pumba-dktale",
+                    categoryName = "Disney"
+                )
+            )
+
+            testItems.forEach { item ->
+                app.mediaRepository.addMediaItem(item)
+                Log.d("LibraryViewModel", "Added test item: ${item.title}")
+            }
+        }
+    }
 }
