@@ -27,7 +27,8 @@ import com.archiveplayer.tv.data.local.MediaItemEntity
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel = viewModel(),
     onNavigateToAddSource: () -> Unit,
-    onItemClicked: (String) -> Unit // <--- ÆNDRET TIL INT (ID)
+    onNavigateToDirectAdd: () -> Unit,
+    onItemClicked: (String) -> Unit
 ) {
     val profile by libraryViewModel.userProfile.collectAsState(initial = null)
     val sections by libraryViewModel.sections.collectAsState(initial = emptyList())
@@ -57,8 +58,16 @@ fun LibraryScreen(
                 )
             }
 
-            Button(onClick = onNavigateToAddSource) {
-                Text("Add Source")
+            Row {
+                Button(
+                    onClick = onNavigateToDirectAdd,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("Direct URL")
+                }
+                Button(onClick = onNavigateToAddSource) {
+                    Text("Add Source")
+                }
             }
         }
 
@@ -91,9 +100,12 @@ fun LibraryScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(48.dp)
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                items(sections, key = { it.categoryName }) { section ->
+                items(
+                    items = sections,
+                    key = { it.categoryName }
+                ) { section ->
                     CategorySection(
                         section = section,
                         onItemClicked = onItemClicked
@@ -108,10 +120,17 @@ fun LibraryScreen(
 @Composable
 private fun CategorySection(
     section: LibrarySection,
-    onItemClicked: (String) -> Unit // <--- Skal være String
+    onItemClicked: (String) -> Unit
 ) {
     Column {
-        // ...
+        Text(
+            text = section.categoryName.uppercase(),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -119,7 +138,7 @@ private fun CategorySection(
             section.items.forEach { item ->
                 MediaCard(
                     item = item,
-                    onClick = { onItemClicked(item.archiveIdentifier) } // <--- SEND IDENTIFIER HER
+                    onClick = { onItemClicked(item.archiveIdentifier) }
                 )
             }
         }
@@ -149,23 +168,15 @@ private fun MediaCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF111827))
+                    .background(Color(0xFF1E3A8A))
                     .padding(12.dp)
             ) {
                 Text(
                     text = item.title,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = item.categoryName,
-                    fontSize = 12.sp,
-                    color = Color(0xFF9CA3AF),
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
