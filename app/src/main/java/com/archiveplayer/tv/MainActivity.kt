@@ -9,11 +9,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.MaterialTheme
+import com.archiveplayer.tv.data.local.MediaItemEntity
 import com.archiveplayer.tv.features.add.AddToLibraryScreen
 import com.archiveplayer.tv.features.library.LibraryScreen
 import com.archiveplayer.tv.features.library.LibraryViewModel
 import com.archiveplayer.tv.features.login.LoginScreen
 import com.archiveplayer.tv.features.login.LoginViewModel
+import com.archiveplayer.tv.features.player.PlayerScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +65,9 @@ fun ArchivePlayerApp() {
                 onNavigateToAddSource = {
                     navController.navigate("search")
                 },
-                onItemClicked = { archiveIdentifier ->
-                    navController.navigate("detail/$archiveIdentifier")
+                onItemClicked = { identifier ->
+                    // RETTET: Naviger DIREKTE til player med identifier
+                    navController.navigate("player/$identifier")
                 }
             )
         }
@@ -77,13 +80,27 @@ fun ArchivePlayerApp() {
             )
         }
 
-        composable("detail/{itemId}") { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getString("itemId") ?: "Unknown"
+        composable("detail/{identifier}") { backStackEntry ->
+            val identifier = backStackEntry.arguments?.getString("identifier") ?: "Unknown"
+
+            val placeholderItem = MediaItemEntity(
+                id = 0,
+                archiveIdentifier = identifier,
+                title = "Loading...",
+                description = null,
+                thumbnailUrl = "",
+                categoryName = ""
+            )
+
             com.archiveplayer.tv.features.detail.DetailScreen(
-                itemId = itemId,
+                mediaItem = placeholderItem,
                 onBackClick = { navController.popBackStack() },
-                onAddToLibrary = { identifier ->
-                    navController.navigate("add_to_library/$identifier")
+                onAddToLibrary = { id ->
+                    navController.navigate("add_to_library/$id")
+                },
+                onPlayClick = { id ->
+                    // RETTET: Send identifier til player
+                    navController.navigate("player/$id")
                 }
             )
         }
@@ -98,6 +115,25 @@ fun ArchivePlayerApp() {
                     }
                 },
                 onCancel = { navController.popBackStack() }
+            )
+        }
+
+        // RETTET: Tager nu {identifier} i stedet for {itemId}
+        composable("player/{identifier}") { backStackEntry ->
+            val identifier = backStackEntry.arguments?.getString("identifier") ?: ""
+
+            val placeholderItem = MediaItemEntity(
+                id = 0,
+                archiveIdentifier = identifier,
+                title = "",
+                description = null,
+                thumbnailUrl = "",
+                categoryName = ""
+            )
+
+            PlayerScreen(
+                mediaItem = placeholderItem,
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

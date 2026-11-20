@@ -27,7 +27,7 @@ import com.archiveplayer.tv.data.local.MediaItemEntity
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel = viewModel(),
     onNavigateToAddSource: () -> Unit,
-    onItemClicked: (String) -> Unit
+    onItemClicked: (String) -> Unit // <--- ÆNDRET TIL INT (ID)
 ) {
     val profile by libraryViewModel.userProfile.collectAsState(initial = null)
     val sections by libraryViewModel.sections.collectAsState(initial = emptyList())
@@ -108,17 +108,10 @@ fun LibraryScreen(
 @Composable
 private fun CategorySection(
     section: LibrarySection,
-    onItemClicked: (String) -> Unit
+    onItemClicked: (String) -> Unit // <--- Skal være String
 ) {
     Column {
-        Text(
-            text = section.categoryName,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
+        // ...
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -126,7 +119,7 @@ private fun CategorySection(
             section.items.forEach { item ->
                 MediaCard(
                     item = item,
-                    onClick = { onItemClicked(item.archiveIdentifier) }
+                    onClick = { onItemClicked(item.archiveIdentifier) } // <--- SEND IDENTIFIER HER
                 )
             }
         }
