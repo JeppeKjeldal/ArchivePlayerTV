@@ -1,23 +1,21 @@
 package com.archiveplayer.tv.features.library
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.tv.material3.Button
+import androidx.tv.material3.Card
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
@@ -38,58 +36,64 @@ fun LibraryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .padding(32.dp)
+            .padding(horizontal = 48.dp, vertical = 32.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Welcome back, ${profile?.profileName ?: "Guest"}!",
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White
-            )
+            Column {
+                Text(
+                    text = "Welcome back, ${profile?.profileName ?: "Guest"}",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = "Continue watching or browse your library",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF9CA3AF)
+                )
+            }
 
-            Row {
-                Button(onClick = onNavigateToAddSource) {
-                    Text("Add Source")
-                }
+            Button(onClick = onNavigateToAddSource) {
+                Text("Add Source")
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(48.dp))
 
         if (sections.isEmpty()) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Your library is empty.\nUse 'Add Source' to find something to watch.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.LightGray
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Your library is empty",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Start by adding some content from Archive.org",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFF9CA3AF)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(onClick = onNavigateToAddSource) {
+                        Text("Add Content")
+                    }
+                }
             }
         } else {
-            Text(
-                text = "Your Library",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(32.dp)
+                verticalArrangement = Arrangement.spacedBy(48.dp)
             ) {
-                items(
-                    items = sections,
-                    key = { it.categoryName }
-                ) { section ->
+                items(sections, key = { it.categoryName }) { section ->
                     CategorySection(
                         section = section,
                         onItemClicked = onItemClicked
@@ -109,11 +113,11 @@ private fun CategorySection(
     Column {
         Text(
             text = section.categoryName,
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -134,53 +138,44 @@ private fun MediaCard(
     item: MediaItemEntity,
     onClick: () -> Unit
 ) {
-    var isFocused by remember { mutableStateOf(false) }
-
-    val scale = if (isFocused) 1.05f else 1f
-
-    Column(
-        modifier = Modifier
-            .width(150.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .focusable()
-            .onFocusChanged { isFocused = it.isFocused }
-            .clickable { onClick() }
+    Card(
+        onClick = onClick,
+        modifier = Modifier.width(160.dp)
     ) {
-        AsyncImage(
-            model = item.thumbnailUrl,
-            contentDescription = item.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .background(
-                    if (isFocused) Color.Gray else Color.DarkGray
-                )
-        )
+        Column {
+            AsyncImage(
+                model = item.thumbnailUrl,
+                contentDescription = item.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .background(Color(0xFF111827))
+            )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(if (isFocused) Color.DarkGray else Color(0xFF1A1A2E))
-                .padding(8.dp)
-        ) {
-            Text(
-                text = item.title,
-                fontSize = 14.sp,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = item.categoryName,
-                fontSize = 11.sp,
-                color = Color.LightGray,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF111827))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = item.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = item.categoryName,
+                    fontSize = 12.sp,
+                    color = Color(0xFF9CA3AF),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
