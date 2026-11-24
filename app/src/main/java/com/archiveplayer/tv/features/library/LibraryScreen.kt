@@ -3,6 +3,7 @@ package com.archiveplayer.tv.features.library
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +22,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.archiveplayer.tv.data.local.LibrarySection
 import com.archiveplayer.tv.data.local.MediaItemEntity
-import androidx.compose.foundation.layout.Box
+import com.archiveplayer.tv.data.local.RecentlyWatchedItem
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
@@ -34,6 +35,7 @@ fun LibraryScreen(
 ) {
     val profile by libraryViewModel.userProfile.collectAsState(initial = null)
     val sections by libraryViewModel.sections.collectAsState(initial = emptyList())
+    val recentlyWatched by libraryViewModel.recentlyWatched.collectAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
@@ -81,7 +83,7 @@ fun LibraryScreen(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        if (sections.isEmpty()) {
+        if (sections.isEmpty() && recentlyWatched.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment = Alignment.Center
@@ -107,16 +109,139 @@ fun LibraryScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
+                if (recentlyWatched.isNotEmpty()) {
+                    item {
+                        RecentlyWatchedSection(
+                            items = recentlyWatched,
+                            onItemClicked = onItemClicked
+                        )
+                    }
+                }
+
                 items(
-                    items = sections,
+                    items = sections.filter { it.categoryName != "Recently Watched" },
                     key = { it.categoryName }
                 ) { section ->
                     CategorySection(
                         section = section,
                         onItemClicked = onItemClicked
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentlyWatchedSection(
+    items: List<RecentlyWatchedItem>,
+    onItemClicked: (String) -> Unit
+) {
+    Column {
+        Text(
+            text = "RECENTLY WATCHED",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(items, key = { it.mediaItem.id }) { item ->
+                RecentlyWatchedCard(
+                    item = item,
+                    onClick = { onItemClicked(item.mediaItem.archiveIdentifier) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentlyWatchedCard(
+    item: RecentlyWatchedItem,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.width(160.dp)
+    ) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+            ) {
+                AsyncImage(
+                    model = item.mediaItem.thumbnailUrl,
+                    contentDescription = item.mediaItem.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF111827))
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(Color(0xFF000000))
+                )
+
+                if (item.mediaItem.durationSeconds > 0) {
+                    val progress = (item.mediaItem.watchProgressSeconds.toFloat() / item.mediaItem.durationSeconds.toFloat())
+                        .coerceIn(0f, 1f)
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .height(6.dp)
+                            .align(Alignment.BottomStart)
+                            .background(Color(0xFFE50914))
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF1E3A8A))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = item.mediaItem.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                if (item.seasonNumber != null && item.episodeNumber != null) {
+                    Text(
+                        text = "S${item.seasonNumber.toString().padStart(2, '0')}E${item.episodeNumber.toString().padStart(2, '0')}",
+                        fontSize = 12.sp,
+                        color = Color(0xFF9CA3AF),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                if (item.timeRemainingSeconds > 0) {
+                    val minutes = (item.timeRemainingSeconds / 60).coerceAtLeast(1)
+
+                    Text(
+                        text = "${minutes}m left",
+                        fontSize = 12.sp,
+                        color = Color(0xFF9CA3AF),
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
@@ -181,14 +306,6 @@ private fun MediaCard(
                 if (item.watchProgressSeconds > 0 && item.durationSeconds > 0) {
                     val progress = (item.watchProgressSeconds.toFloat() / item.durationSeconds.toFloat())
                         .coerceIn(0f, 1f)
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .align(Alignment.BottomCenter)
-                            .background(Color(0xFF000000))
-                    )
 
                     Box(
                         modifier = Modifier
