@@ -13,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
-import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.archiveplayer.tv.data.local.MediaItemEntity
@@ -31,7 +30,6 @@ fun DetailScreen(
             .background(Color.Black)
             .padding(horizontal = 48.dp, vertical = 32.dp)
     ) {
-        // Back Button
         Row(
             modifier = Modifier
                 .clickable { onBackClick() }
@@ -46,12 +44,10 @@ fun DetailScreen(
             )
         }
 
-        // Content Layout
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // Thumbnail
             AsyncImage(
                 model = mediaItem.thumbnailUrl,
                 contentDescription = mediaItem.title,
@@ -62,7 +58,6 @@ fun DetailScreen(
                     .background(Color.DarkGray)
             )
 
-            // Info & Actions
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -89,7 +84,6 @@ fun DetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Action Buttons
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(
                         onClick = { onPlayClick(mediaItem.archiveIdentifier) },
