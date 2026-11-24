@@ -1,14 +1,19 @@
 package com.archiveplayer.tv.features.library
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +41,8 @@ fun LibraryScreen(
     val profile by libraryViewModel.userProfile.collectAsState(initial = null)
     val sections by libraryViewModel.sections.collectAsState(initial = emptyList())
     val recentlyWatched by libraryViewModel.recentlyWatched.collectAsState(initial = emptyList())
+    val searchQuery by libraryViewModel.searchQuery.collectAsState()
+    val isSearching by libraryViewModel.isSearching.collectAsState()
 
     Column(
         modifier = Modifier
@@ -48,21 +55,35 @@ fun LibraryScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "Welcome back, ${profile?.profileName ?: "Guest"}",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+            if (isSearching) {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { libraryViewModel.updateSearchQuery(it) },
+                    onClose = { libraryViewModel.closeSearch() }
                 )
-                Text(
-                    text = "Continue watching or browse your library",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF9CA3AF)
-                )
+            } else {
+                Column {
+                    Text(
+                        text = "Welcome back, ${profile?.profileName ?: "Guest"}",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Continue watching or browse your library",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF9CA3AF)
+                    )
+                }
             }
 
             Row {
+                Button(
+                    onClick = { libraryViewModel.toggleSearch() },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text(if (isSearching) "Cancel" else "Search")
+                }
                 Button(
                     onClick = onNavigateToSettings,
                     modifier = Modifier.padding(end = 8.dp)
@@ -83,27 +104,42 @@ fun LibraryScreen(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        if (sections.isEmpty() && recentlyWatched.isEmpty()) {
+        if (sections.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Your library is empty",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Start by adding some content from Archive.org",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFF9CA3AF)
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = onNavigateToAddSource) {
-                        Text("Add Content")
+                    if (searchQuery.isNotBlank()) {
+                        Text(
+                            text = "No matches found for \"$searchQuery\"",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Try a different search term",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color(0xFF9CA3AF)
+                        )
+                    } else {
+                        Text(
+                            text = "Your library is empty",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Start by adding some content from Archive.org",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color(0xFF9CA3AF)
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = onNavigateToAddSource) {
+                            Text("Add Content")
+                        }
                     }
                 }
             }
@@ -114,7 +150,7 @@ fun LibraryScreen(
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                if (recentlyWatched.isNotEmpty()) {
+                if (recentlyWatched.isNotEmpty() && searchQuery.isBlank()) {
                     item {
                         RecentlyWatchedSection(
                             items = recentlyWatched,
@@ -133,6 +169,52 @@ fun LibraryScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClose: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(Color(0xFF1F2937))
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = "🔍",
+            fontSize = 20.sp,
+            modifier = Modifier.padding(end = 12.dp)
+        )
+
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            singleLine = true,
+            textStyle = androidx.compose.ui.text.TextStyle(
+                color = Color.White,
+                fontSize = 18.sp
+            ),
+            cursorBrush = SolidColor(Color(0xFFE50914)),
+            modifier = Modifier
+                .width(400.dp)
+                .background(Color.Transparent)
+        )
+
+        if (query.isNotEmpty()) {
+            Text(
+                text = "✕",
+                color = Color(0xFF9CA3AF),
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .clickable { onQueryChange("") }
+                    .focusable()
+            )
         }
     }
 }
