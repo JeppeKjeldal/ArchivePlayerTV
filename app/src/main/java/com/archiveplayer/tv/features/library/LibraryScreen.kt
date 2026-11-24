@@ -21,6 +21,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.archiveplayer.tv.data.local.LibrarySection
 import com.archiveplayer.tv.data.local.MediaItemEntity
+import androidx.compose.foundation.layout.Box
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
@@ -99,7 +100,7 @@ fun LibraryScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 items(
@@ -155,16 +156,48 @@ private fun MediaCard(
         modifier = Modifier.width(160.dp)
     ) {
         Column {
-            AsyncImage(
-                model = item.thumbnailUrl,
-                contentDescription = item.title,
-                contentScale = ContentScale.Crop,
+            // Billede med progress bar
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(240.dp)
-                    .background(Color(0xFF111827))
-            )
+            ) {
+                AsyncImage(
+                    model = item.thumbnailUrl,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                        .background(Color(0xFF111827))
+                )
 
+                // Progress bar sektion (kun hvis vi har progress og duration)
+                if (item.watchProgressSeconds > 0 && item.durationSeconds > 0) {
+                    val progress = (item.watchProgressSeconds.toFloat() / item.durationSeconds.toFloat())
+                        .coerceIn(0f, 1f)
+
+                    // Mørk baggrundsstribe (skaber kontrast)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .align(Alignment.BottomCenter)
+                            .background(Color(0xFF000000)) // Sort baggrund
+                    )
+
+                    // Progress-linje (Netflix-rød)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .height(6.dp)
+                            .align(Alignment.BottomStart)
+                            .background(Color(0xFFE50914)) // Netflix-rød
+                    )
+                }
+            }
+
+            // Bundlinje med titel
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

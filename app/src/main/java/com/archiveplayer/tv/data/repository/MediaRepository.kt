@@ -5,7 +5,6 @@ import com.archiveplayer.tv.data.local.MediaItemEntity
 import com.archiveplayer.tv.data.local.UserProfileDao
 import com.archiveplayer.tv.data.local.UserProfileEntity
 import com.archiveplayer.tv.data.local.WatchProgressDao
-import com.archiveplayer.tv.data.local.WatchProgressEntity
 import kotlinx.coroutines.flow.Flow
 
 class MediaRepository(
@@ -13,39 +12,40 @@ class MediaRepository(
     private val watchProgressDao: WatchProgressDao,
     private val userProfileDao: UserProfileDao
 ) {
-
-    fun getAllMediaItems(): Flow<List<MediaItemEntity>> = mediaItemDao.getAllMediaItems()
-
-    fun getMediaItemsByCategory(category: String): Flow<List<MediaItemEntity>> =
-        mediaItemDao.getMediaItemsByCategory(category)
-
-    fun getAllCategories(): Flow<List<String>> = mediaItemDao.getAllCategories()
-
-    fun getRecentlyWatched(): Flow<List<WatchProgressEntity>> = watchProgressDao.getRecentlyWatched()
-
-    fun getUserProfile(): Flow<UserProfileEntity?> = userProfileDao.getUserProfile()
-
-    suspend fun getMediaItemById(id: Int): MediaItemEntity? = mediaItemDao.getMediaItemById(id)
-
-    suspend fun addMediaItem(mediaItem: MediaItemEntity): Long = mediaItemDao.insert(mediaItem)
-
-    suspend fun deleteMediaItem(id: Int) = mediaItemDao.deleteById(id)
-
-    suspend fun updateWatchProgress(mediaItemId: Int, currentPositionMs: Long, durationMs: Long) {
-        val progress = WatchProgressEntity(
-            mediaItemId = mediaItemId,
-            currentPositionMs = currentPositionMs,
-            durationMs = durationMs,
-            lastWatched = System.currentTimeMillis()
-        )
-        watchProgressDao.insertOrUpdate(progress)
+    fun getAllMediaItems(): Flow<List<MediaItemEntity>> {
+        return mediaItemDao.getAllMediaItems()
     }
 
-    suspend fun getWatchProgress(mediaItemId: Int): WatchProgressEntity? =
-        watchProgressDao.getWatchProgress(mediaItemId)
+    fun getRecentlyWatched(): Flow<List<MediaItemEntity>> {
+        return mediaItemDao.getRecentlyWatched()
+    }
+
+    suspend fun addMediaItem(item: MediaItemEntity) {
+        mediaItemDao.insertMediaItem(item)
+    }
+
+    suspend fun getMediaItemByIdentifier(identifier: String): MediaItemEntity? {
+        return mediaItemDao.getMediaItemByIdentifier(identifier)
+    }
+
+    suspend fun getMediaItemById(id: Int): MediaItemEntity? {
+        return mediaItemDao.getMediaItemById(id)
+    }
+
+    suspend fun updateWatchProgress(id: Int, progressSeconds: Int, episodeFileName: String?, lastWatched: Long) {
+        mediaItemDao.updateWatchProgress(id, progressSeconds, episodeFileName, lastWatched)
+    }
 
     suspend fun saveProfileName(profileName: String) {
         val profile = UserProfileEntity(profileName = profileName)
-        userProfileDao.insertOrUpdate(profile)
+        userProfileDao.insertUserProfile(profile)
+    }
+
+    fun getUserProfile(): Flow<UserProfileEntity?> {
+        return userProfileDao.getUserProfile()
+    }
+
+    suspend fun updateDuration(id: Int, durationSeconds: Int) {
+        mediaItemDao.updateDuration(id, durationSeconds)
     }
 }
