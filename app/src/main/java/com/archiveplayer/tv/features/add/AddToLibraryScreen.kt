@@ -43,7 +43,6 @@ fun AddToLibraryScreen(
                     details = ArchiveDetails.fromMetadata(identifier, metadata)
                 }
             } catch (e: Exception) {
-                // Handle error silently or log
             } finally {
                 isLoading = false
             }

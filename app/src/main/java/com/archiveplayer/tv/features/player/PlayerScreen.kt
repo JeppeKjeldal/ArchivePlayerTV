@@ -43,7 +43,6 @@ fun PlayerScreen(
     val currentTitle by viewModel.title.collectAsState()
     val currentDescription by viewModel.description.collectAsState()
 
-    // RETTET: Sender kun identifier. ViewModel slår selv itemId op i databasen for at gemme progress.
     LaunchedEffect(mediaItem.archiveIdentifier) {
         viewModel.loadMedia(identifier = mediaItem.archiveIdentifier)
     }
@@ -116,7 +115,7 @@ fun PlayerScreen(
             )
         }
 
-        // Episode Selector (Only show if it's a series/multiple items)
+        // Episode Selector
         if (episodes.size > 1) {
             EpisodeSelectorSection(
                 episodes = episodes,
@@ -156,7 +155,7 @@ private fun EpisodeSelectorSection(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Season Selector (TV-friendly Chip Row)
+        // Season Selector
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(bottom = 24.dp)
@@ -250,14 +249,6 @@ private fun EpisodeCard(
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "Part ${episode.episodeNumber}",
-                fontSize = 12.sp,
-                color = Color(0xFF9CA3AF),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

@@ -156,7 +156,6 @@ private fun MediaCard(
         modifier = Modifier.width(160.dp)
     ) {
         Column {
-            // Billede med progress bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -172,32 +171,28 @@ private fun MediaCard(
                         .background(Color(0xFF111827))
                 )
 
-                // Progress bar sektion (kun hvis vi har progress og duration)
                 if (item.watchProgressSeconds > 0 && item.durationSeconds > 0) {
                     val progress = (item.watchProgressSeconds.toFloat() / item.durationSeconds.toFloat())
                         .coerceIn(0f, 1f)
 
-                    // Mørk baggrundsstribe (skaber kontrast)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(6.dp)
                             .align(Alignment.BottomCenter)
-                            .background(Color(0xFF000000)) // Sort baggrund
+                            .background(Color(0xFF000000))
                     )
 
-                    // Progress-linje (Netflix-rød)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(progress)
                             .height(6.dp)
                             .align(Alignment.BottomStart)
-                            .background(Color(0xFFE50914)) // Netflix-rød
+                            .background(Color(0xFFE50914))
                     )
                 }
             }
 
-            // Bundlinje med titel
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

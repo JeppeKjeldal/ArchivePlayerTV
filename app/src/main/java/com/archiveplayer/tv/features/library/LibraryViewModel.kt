@@ -25,7 +25,6 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     private fun buildSections(recentlyWatched: List<MediaItemEntity>, items: List<MediaItemEntity>): List<LibrarySection> {
         val sections = mutableListOf<LibrarySection>()
 
-        // 1. Recently Watched (altid først, hvis der er noget)
         if (recentlyWatched.isNotEmpty()) {
             sections.add(
                 LibrarySection(
@@ -35,11 +34,10 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
             )
         }
 
-        // 2. Grupper ALLE items efter kategori (RET: Vi fjerner ikke længere items der er i recently watched)
         val grouped = items.groupBy { it.categoryName }
 
         val sortedKeys = grouped.keys.sortedWith(
-            compareBy<String> { it == "Uncategorized" } // Uncategorized sidst
+            compareBy<String> { it == "Uncategorized" }
                 .thenBy { it.lowercase() }
         )
 

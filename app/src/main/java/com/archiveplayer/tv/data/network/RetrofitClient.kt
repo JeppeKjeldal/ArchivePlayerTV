@@ -42,9 +42,6 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // IMPORTANT: This TrustManager ignores SSL certificate errors.
-    // ONLY use this for development/testing in emulators.
-    // Remove this before releasing to production!
     private val unsafeTrustManager = object : X509TrustManager {
         override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
         override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}

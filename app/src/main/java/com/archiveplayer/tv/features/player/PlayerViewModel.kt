@@ -21,6 +21,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.security.cert.X509Certificate
+import java.util.regex.Pattern
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
@@ -28,11 +29,11 @@ import javax.net.ssl.X509TrustManager
 data class Episode(
     val fileName: String,
     val displayName: String,
-    val seasonNumber: Int = 1,
+    val seasonNumber: Int,
     val episodeNumber: Int,
     val thumbnailUrl: String? = null,
     val description: String? = null,
-    val durationSeconds: Int = 0  // NYT: Varighed i sekunder
+    val durationSeconds: Int = 0
 )
 
 @OptIn(UnstableApi::class)
@@ -107,28 +108,57 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                     }
 
                     if (videoFiles.isNotEmpty()) {
+                        val primaryPattern = Pattern.compile("(?i).*[Ss](?:eason)?[\\s._-]*(\\d{1,2})[\\s._-]*[Ee](?:pisode)?[\\s._-]*(\\d{1,2}).*")
+                        val fallbackPattern = Pattern.compile("(?i).*(\\d{1,2})x(\\d{1,2}).*")
+                        val episodeOnlyPattern = Pattern.compile("(?i).*[Ee]pisode[\\s._-]*(\\d{1,2}).*")
+
                         val parsedEpisodes = videoFiles.mapIndexed { index, file ->
                             val fileName = file["name"] as String
-                            // RET: Hent length fra metadata (i sekunder som en streng)
                             val durationSeconds = (file["length"] as? String)?.toFloatOrNull()?.toInt() ?: 0
+
+                            var seasonNumber = 1
+                            var episodeNumber = index + 1
+                            var displayName = "Part ${index + 1}"
+
+                            val primaryMatcher = primaryPattern.matcher(fileName)
+                            if (primaryMatcher.find()) {
+                                seasonNumber = primaryMatcher.group(1)?.toIntOrNull() ?: 1
+                                episodeNumber = primaryMatcher.group(2)?.toIntOrNull() ?: (index + 1)
+                                displayName = "S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')}"
+                            } else {
+                                val fallbackMatcher = fallbackPattern.matcher(fileName)
+                                if (fallbackMatcher.find()) {
+                                    seasonNumber = fallbackMatcher.group(1)?.toIntOrNull() ?: 1
+                                    episodeNumber = fallbackMatcher.group(2)?.toIntOrNull() ?: (index + 1)
+                                    displayName = "S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')}"
+                                } else {
+                                    val episodeOnlyMatcher = episodeOnlyPattern.matcher(fileName)
+                                    if (episodeOnlyMatcher.find()) {
+                                        seasonNumber = 1
+                                        episodeNumber = episodeOnlyMatcher.group(1)?.toIntOrNull() ?: (index + 1)
+                                        displayName = "Episode ${episodeNumber}"
+                                    }
+                                }
+                            }
 
                             Episode(
                                 fileName = fileName,
-                                displayName = "Part ${index + 1}",
-                                episodeNumber = index + 1,
+                                displayName = displayName,
+                                seasonNumber = seasonNumber,
+                                episodeNumber = episodeNumber,
                                 description = _description.value,
                                 durationSeconds = durationSeconds
                             )
                         }
+
                         _episodes.value = parsedEpisodes
 
-                        // RET: Gem varigheden for det første afsnit med det samme
-                        val firstEpisode = parsedEpisodes.first()
-                        if (mediaItemId != 0 && firstEpisode.durationSeconds > 0) {
-                            app.mediaRepository.updateDuration(mediaItemId, firstEpisode.durationSeconds)
-                        }
+                        val episodeToStart = parsedEpisodes.find { it.fileName == dbItem?.currentEpisodeFileName }
+                            ?: parsedEpisodes.first()
 
-                        playEpisode(firstEpisode.fileName, identifier)
+                        val startPositionMs = (dbItem?.watchProgressSeconds ?: 0) * 1000L
+
+                        playEpisode(episodeToStart.fileName, identifier, startPositionMs)
                     }
                 }
             } catch (e: Exception) {
@@ -162,7 +192,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
         exoPlayer.play()
 
-        // RET: Opdater varigheden i databasen når vi skifter afsnit
         viewModelScope.launch {
             val currentEpisode = _episodes.value.find { it.fileName == fileName }
             if (mediaItemId != 0 && currentEpisode != null && currentEpisode.durationSeconds > 0) {

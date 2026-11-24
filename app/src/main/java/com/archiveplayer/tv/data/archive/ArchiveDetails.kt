@@ -40,7 +40,7 @@ data class ArchiveDetails(
                 description = description,
                 thumbnailUrl = "https://archive.org/services/img/$identifier",
                 videoFiles = videoFiles,
-                allFiles = allFileNames.take(10) // Vis max 10 til debugging
+                allFiles = allFileNames.take(10)
             )
         }
     }
