@@ -32,7 +32,7 @@ class ArchivePlayerApplication : Application(), ImageLoaderFactory {
         )
 
         settingsManager = com.archiveplayer.tv.data.local.SettingsManager(this)
-        tmdbService = TmdbService(this) // NYT
+        tmdbService = TmdbService(this)
     }
 
     override fun newImageLoader(): ImageLoader {

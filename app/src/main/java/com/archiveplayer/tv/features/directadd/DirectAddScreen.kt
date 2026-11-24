@@ -36,7 +36,7 @@ fun DirectAddScreen(
 
     val preview by viewModel.preview.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val isFetchingTmdb by viewModel.isFetchingTmdb.collectAsState() // NYT
+    val isFetchingTmdb by viewModel.isFetchingTmdb.collectAsState()
 
     Box(
         modifier = Modifier
@@ -102,7 +102,6 @@ fun DirectAddScreen(
                             .background(Color.DarkGray)
                     )
 
-                    // TMDB loading indicator
                     if (isFetchingTmdb) {
                         Box(
                             modifier = Modifier
@@ -117,7 +116,6 @@ fun DirectAddScreen(
                         }
                     }
 
-                    // TMDB badge
                     if (preview!!.tmdbId != null && !isFetchingTmdb) {
                         Box(
                             modifier = Modifier

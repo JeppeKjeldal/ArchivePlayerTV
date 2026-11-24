@@ -40,7 +40,6 @@ data class TmdbEpisodeResponse(
     val overview: String? = null
 )
 
-// Vores egen samlede model til appen
 data class TmdbMatchResult(
     val tmdbId: Int,
     val title: String,

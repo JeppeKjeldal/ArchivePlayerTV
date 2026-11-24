@@ -17,7 +17,6 @@ data class DirectAddPreview(
     val title: String,
     val description: String?,
     val thumbnailUrl: String,
-    // NYT: TMDB-data
     val tmdbId: Int? = null,
     val tmdbMediaType: String? = null,
     val tmdbPosterUrl: String? = null
@@ -33,7 +32,6 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // NYT: Tracking af TMDB-fetch
     private val _isFetchingTmdb = MutableStateFlow(false)
     val isFetchingTmdb: StateFlow<Boolean> = _isFetchingTmdb.asStateFlow()
 
@@ -57,7 +55,6 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
                     val description = meta["description"] as? String
                     val archiveThumbnail = "https://archive.org/services/img/$identifier"
 
-                    // Start med Archive.org-data
                     var preview = DirectAddPreview(
                         identifier = identifier,
                         title = title,
@@ -66,16 +63,14 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
                     )
                     _preview.value = preview
 
-                    // NYT: Prøv at hente TMDB-data
                     _isFetchingTmdb.value = true
                     try {
                         val tmdbMatch = app.tmdbService.findMatchAsync(title)
                         if (tmdbMatch != null) {
                             Log.d("DirectAddVM", "TMDB match found: ${tmdbMatch.title} (${tmdbMatch.mediaType})")
 
-                            // Opdater preview med TMDB-data
                             preview = preview.copy(
-                                description = description ?: tmdbMatch.title, // Fallback
+                                description = description ?: tmdbMatch.title,
                                 thumbnailUrl = tmdbMatch.posterUrl ?: archiveThumbnail,
                                 tmdbId = tmdbMatch.tmdbId,
                                 tmdbMediaType = tmdbMatch.mediaType,
@@ -110,7 +105,6 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
                 description = currentPreview.description,
                 thumbnailUrl = currentPreview.thumbnailUrl,
                 categoryName = finalCategory,
-                // NYT: Gem TMDB-data
                 tmdbId = currentPreview.tmdbId,
                 tmdbMediaType = currentPreview.tmdbMediaType,
                 tmdbPosterUrl = currentPreview.tmdbPosterUrl

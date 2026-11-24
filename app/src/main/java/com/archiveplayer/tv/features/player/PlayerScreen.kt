@@ -100,15 +100,19 @@ fun PlayerScreen(
             val currentEpisode = episodes.find { it.fileName == currentFileName }
             if (currentEpisode != null && episodes.size > 1) {
                 Text(
-                    text = "Season ${currentEpisode.seasonNumber}, Part ${currentEpisode.episodeNumber}",
+                    text = "Season ${currentEpisode.seasonNumber}, Episode ${currentEpisode.episodeNumber}",
                     fontSize = 18.sp,
                     color = Color(0xFF9CA3AF),
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                 )
             }
 
+            val displayDescription = currentEpisode?.overview?.takeIf { it.isNotBlank() }
+                ?: currentDescription
+                ?: "No description available."
+
             Text(
-                text = currentDescription ?: "No description available.",
+                text = displayDescription,
                 fontSize = 16.sp,
                 color = Color(0xFF9CA3AF),
                 modifier = Modifier.padding(top = 8.dp)
@@ -249,6 +253,13 @@ private fun EpisodeCard(
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "S${episode.seasonNumber.toString().padStart(2, '0')}E${episode.episodeNumber.toString().padStart(2, '0')}",
+                fontSize = 12.sp,
+                color = Color(0xFF9CA3AF),
+                maxLines = 1,
+                modifier = Modifier.padding(top = 2.dp)
             )
         }
     }

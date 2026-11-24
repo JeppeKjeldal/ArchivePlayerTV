@@ -6,6 +6,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -33,7 +34,8 @@ data class Episode(
     val episodeNumber: Int,
     val thumbnailUrl: String? = null,
     val description: String? = null,
-    val durationSeconds: Int = 0
+    val durationSeconds: Int = 0,
+    val overview: String? = null
 )
 
 @OptIn(UnstableApi::class)
@@ -112,7 +114,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                         val fallbackPattern = Pattern.compile("(?i).*(\\d{1,2})x(\\d{1,2}).*")
                         val episodeOnlyPattern = Pattern.compile("(?i).*[Ee]pisode[\\s._-]*(\\d{1,2}).*")
 
-                        val parsedEpisodes = videoFiles.mapIndexed { index, file ->
+                        var parsedEpisodes = videoFiles.mapIndexed { index, file ->
                             val fileName = file["name"] as String
                             val durationSeconds = (file["length"] as? String)?.toFloatOrNull()?.toInt() ?: 0
 
@@ -151,12 +153,39 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                             )
                         }
 
+                        if (dbItem?.tmdbId != null && dbItem.tmdbMediaType == "tv") {
+                            try {
+                                val tmdbEpisodes = app.tmdbService.fetchEpisodesAsync(dbItem.tmdbId)
+
+                                parsedEpisodes = parsedEpisodes.map { episode ->
+                                    val tmdbEp = tmdbEpisodes.find {
+                                        it.seasonNumber == episode.seasonNumber &&
+                                                it.episodeNumber == episode.episodeNumber
+                                    }
+
+                                    if (tmdbEp != null) {
+                                        episode.copy(
+                                            displayName = tmdbEp.name ?: episode.displayName,
+                                            overview = tmdbEp.overview,
+                                            thumbnailUrl = tmdbEp.stillUrl ?: episode.thumbnailUrl
+                                        )
+                                    } else {
+                                        episode
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.w("PlayerViewModel", "Failed to fetch TMDB episodes", e)
+                            }
+                        }
+
                         _episodes.value = parsedEpisodes
 
                         val episodeToStart = parsedEpisodes.find { it.fileName == dbItem?.currentEpisodeFileName }
                             ?: parsedEpisodes.first()
 
                         val startPositionMs = (dbItem?.watchProgressSeconds ?: 0) * 1000L
+
+                        _selectedSeason.value = episodeToStart.seasonNumber
 
                         playEpisode(episodeToStart.fileName, identifier, startPositionMs)
                     }

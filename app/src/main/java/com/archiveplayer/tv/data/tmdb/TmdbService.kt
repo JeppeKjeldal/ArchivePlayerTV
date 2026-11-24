@@ -22,7 +22,6 @@ class TmdbService(private val app: ArchivePlayerApplication) {
     private val tmdbApi: TmdbApi = retrofit.create(TmdbApi::class.java)
     private val imageBaseUrl = "https://image.tmdb.org/t/p/w500"
 
-    // Henter API-nøglen dynamisk fra SettingsManager
     private val apiKey: String?
         get() = app.settingsManager.tmdbApiKey
 
@@ -36,11 +35,9 @@ class TmdbService(private val app: ArchivePlayerApplication) {
         val cleanedTitle = TitleCleaner.cleanForSearch(title)
         if (cleanedTitle.isBlank()) return null
 
-        // Prøv TV først
         val tvResult = searchAsync(cleanedTitle, "tv", key)
         if (tvResult != null) return tvResult
 
-        // Fald tilbage til Movie
         return searchAsync(cleanedTitle, "movie", key)
     }
 

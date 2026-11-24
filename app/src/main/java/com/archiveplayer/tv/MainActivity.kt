@@ -69,7 +69,7 @@ fun ArchivePlayerApp() {
                 onNavigateToDirectAdd = {
                     navController.navigate("direct_add")
                 },
-                onNavigateToSettings = {  // <--- NYT
+                onNavigateToSettings = {
                     navController.navigate("settings")
                 },
                 onItemClicked = { archiveIdentifier ->

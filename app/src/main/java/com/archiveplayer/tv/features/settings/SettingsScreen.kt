@@ -40,7 +40,6 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(48.dp)
     ) {
-        // Back button
         Row(
             modifier = Modifier
                 .clickable { onBackClick() }
