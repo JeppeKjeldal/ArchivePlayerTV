@@ -29,6 +29,7 @@ fun LibraryScreen(
     libraryViewModel: LibraryViewModel = viewModel(),
     onNavigateToAddSource: () -> Unit,
     onNavigateToDirectAdd: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onItemClicked: (String) -> Unit
 ) {
     val profile by libraryViewModel.userProfile.collectAsState(initial = null)
@@ -60,6 +61,12 @@ fun LibraryScreen(
             }
 
             Row {
+                Button(
+                    onClick = onNavigateToSettings,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("Settings")
+                }
                 Button(
                     onClick = onNavigateToDirectAdd,
                     modifier = Modifier.padding(end = 8.dp)

@@ -16,7 +16,11 @@ data class DirectAddPreview(
     val identifier: String,
     val title: String,
     val description: String?,
-    val thumbnailUrl: String
+    val thumbnailUrl: String,
+    // NYT: TMDB-data
+    val tmdbId: Int? = null,
+    val tmdbMediaType: String? = null,
+    val tmdbPosterUrl: String? = null
 )
 
 class DirectAddViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,6 +32,10 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    // NYT: Tracking af TMDB-fetch
+    private val _isFetchingTmdb = MutableStateFlow(false)
+    val isFetchingTmdb: StateFlow<Boolean> = _isFetchingTmdb.asStateFlow()
 
     fun fetchMetadata(input: String) {
         viewModelScope.launch {
@@ -47,13 +55,41 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
 
                     val title = (meta["title"] as? String) ?: identifier
                     val description = meta["description"] as? String
+                    val archiveThumbnail = "https://archive.org/services/img/$identifier"
 
-                    _preview.value = DirectAddPreview(
+                    // Start med Archive.org-data
+                    var preview = DirectAddPreview(
                         identifier = identifier,
                         title = title,
                         description = description,
-                        thumbnailUrl = "https://archive.org/services/img/$identifier"
+                        thumbnailUrl = archiveThumbnail
                     )
+                    _preview.value = preview
+
+                    // NYT: Prøv at hente TMDB-data
+                    _isFetchingTmdb.value = true
+                    try {
+                        val tmdbMatch = app.tmdbService.findMatchAsync(title)
+                        if (tmdbMatch != null) {
+                            Log.d("DirectAddVM", "TMDB match found: ${tmdbMatch.title} (${tmdbMatch.mediaType})")
+
+                            // Opdater preview med TMDB-data
+                            preview = preview.copy(
+                                description = description ?: tmdbMatch.title, // Fallback
+                                thumbnailUrl = tmdbMatch.posterUrl ?: archiveThumbnail,
+                                tmdbId = tmdbMatch.tmdbId,
+                                tmdbMediaType = tmdbMatch.mediaType,
+                                tmdbPosterUrl = tmdbMatch.posterUrl
+                            )
+                            _preview.value = preview
+                        } else {
+                            Log.d("DirectAddVM", "No TMDB match found, using Archive.org data")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("DirectAddVM", "TMDB fetch failed", e)
+                    } finally {
+                        _isFetchingTmdb.value = false
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("DirectAddViewModel", "Error fetching metadata", e)
@@ -73,11 +109,15 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
                 title = currentPreview.title,
                 description = currentPreview.description,
                 thumbnailUrl = currentPreview.thumbnailUrl,
-                categoryName = finalCategory
+                categoryName = finalCategory,
+                // NYT: Gem TMDB-data
+                tmdbId = currentPreview.tmdbId,
+                tmdbMediaType = currentPreview.tmdbMediaType,
+                tmdbPosterUrl = currentPreview.tmdbPosterUrl
             )
 
             app.mediaRepository.addMediaItem(entity)
-            Log.d("DirectAddViewModel", "Saved: ${currentPreview.title}")
+            Log.d("DirectAddViewModel", "Saved: ${currentPreview.title} (TMDB ID: ${currentPreview.tmdbId})")
         }
     }
 }

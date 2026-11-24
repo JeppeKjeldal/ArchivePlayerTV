@@ -21,6 +21,9 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun DirectAddScreen(
@@ -33,6 +36,7 @@ fun DirectAddScreen(
 
     val preview by viewModel.preview.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isFetchingTmdb by viewModel.isFetchingTmdb.collectAsState() // NYT
 
     Box(
         modifier = Modifier
@@ -84,15 +88,53 @@ fun DirectAddScreen(
             if (preview != null) {
                 Spacer(modifier = Modifier.height(32.dp))
 
-                AsyncImage(
-                    model = preview!!.thumbnailUrl,
-                    contentDescription = preview!!.title,
-                    contentScale = ContentScale.Crop,
+                Box(
                     modifier = Modifier
                         .width(150.dp)
                         .height(225.dp)
-                        .background(Color.DarkGray)
-                )
+                ) {
+                    AsyncImage(
+                        model = preview!!.thumbnailUrl,
+                        contentDescription = preview!!.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.DarkGray)
+                    )
+
+                    // TMDB loading indicator
+                    if (isFetchingTmdb) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.6f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp),
+                                color = Color(0xFFE50914)
+                            )
+                        }
+                    }
+
+                    // TMDB badge
+                    if (preview!!.tmdbId != null && !isFetchingTmdb) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .background(Color(0xFFE50914))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "TMDB",
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

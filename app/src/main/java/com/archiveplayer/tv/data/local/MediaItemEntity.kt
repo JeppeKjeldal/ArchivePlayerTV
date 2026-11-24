@@ -15,5 +15,8 @@ data class MediaItemEntity(
     val watchProgressSeconds: Int = 0,
     val currentEpisodeFileName: String? = null,
     val lastWatched: Long = 0L,
-    val durationSeconds: Int = 0
+    val durationSeconds: Int = 0,
+    val tmdbId: Int? = null,
+    val tmdbMediaType: String? = null,
+    val tmdbPosterUrl: String? = null
 )

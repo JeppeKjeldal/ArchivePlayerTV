@@ -48,4 +48,15 @@ class MediaRepository(
     suspend fun updateDuration(id: Int, durationSeconds: Int) {
         mediaItemDao.updateDuration(id, durationSeconds)
     }
+
+    suspend fun updateTmdbData(
+        id: Int,
+        tmdbId: Int?,
+        tmdbMediaType: String?,
+        tmdbPosterUrl: String?,
+        description: String?,
+        thumbnailUrl: String
+    ) {
+        mediaItemDao.updateTmdbData(id, tmdbId, tmdbMediaType, tmdbPosterUrl, description, thumbnailUrl)
+    }
 }

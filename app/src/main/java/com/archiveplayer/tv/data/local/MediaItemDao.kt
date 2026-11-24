@@ -33,4 +33,14 @@ interface MediaItemDao {
 
     @Query("UPDATE media_items SET durationSeconds = :durationSeconds WHERE id = :id")
     suspend fun updateDuration(id: Int, durationSeconds: Int)
+
+    @Query("UPDATE media_items SET tmdbId = :tmdbId, tmdbMediaType = :tmdbMediaType, tmdbPosterUrl = :tmdbPosterUrl, description = :description, thumbnailUrl = :thumbnailUrl WHERE id = :id")
+    suspend fun updateTmdbData(
+        id: Int,
+        tmdbId: Int?,
+        tmdbMediaType: String?,
+        tmdbPosterUrl: String?,
+        description: String?,
+        thumbnailUrl: String
+    )
 }

@@ -7,10 +7,17 @@ import coil.ImageLoaderFactory
 import com.archiveplayer.tv.data.local.AppDatabase
 import com.archiveplayer.tv.data.repository.MediaRepository
 import com.archiveplayer.tv.data.network.RetrofitClient
+import com.archiveplayer.tv.data.tmdb.TmdbService
 
 class ArchivePlayerApplication : Application(), ImageLoaderFactory {
 
     lateinit var mediaRepository: MediaRepository
+        private set
+
+    lateinit var settingsManager: com.archiveplayer.tv.data.local.SettingsManager
+        private set
+
+    lateinit var tmdbService: TmdbService
         private set
 
     override fun onCreate() {
@@ -23,6 +30,9 @@ class ArchivePlayerApplication : Application(), ImageLoaderFactory {
             watchProgressDao = database.watchProgressDao(),
             userProfileDao = database.userProfileDao()
         )
+
+        settingsManager = com.archiveplayer.tv.data.local.SettingsManager(this)
+        tmdbService = TmdbService(this) // NYT
     }
 
     override fun newImageLoader(): ImageLoader {

@@ -69,9 +69,18 @@ fun ArchivePlayerApp() {
                 onNavigateToDirectAdd = {
                     navController.navigate("direct_add")
                 },
+                onNavigateToSettings = {  // <--- NYT
+                    navController.navigate("settings")
+                },
                 onItemClicked = { archiveIdentifier ->
                     navController.navigate("player/$archiveIdentifier")
                 }
+            )
+        }
+
+        composable("settings") {
+            com.archiveplayer.tv.features.settings.SettingsScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 
