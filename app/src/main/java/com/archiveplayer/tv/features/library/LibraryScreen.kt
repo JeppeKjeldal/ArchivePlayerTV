@@ -11,10 +11,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,7 +29,6 @@ import com.archiveplayer.tv.data.local.LibrarySection
 import com.archiveplayer.tv.data.local.MediaItemEntity
 import com.archiveplayer.tv.data.local.RecentlyWatchedItem
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun LibraryScreen(
     libraryViewModel: LibraryViewModel = viewModel(),
@@ -58,8 +57,7 @@ fun LibraryScreen(
             if (isSearching) {
                 SearchBar(
                     query = searchQuery,
-                    onQueryChange = { libraryViewModel.updateSearchQuery(it) },
-                    onClose = { libraryViewModel.closeSearch() }
+                    onQueryChange = { libraryViewModel.updateSearchQuery(it) }
                 )
             } else {
                 Column {
@@ -176,8 +174,7 @@ fun LibraryScreen(
 @Composable
 private fun SearchBar(
     query: String,
-    onQueryChange: (String) -> Unit,
-    onClose: () -> Unit
+    onQueryChange: (String) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -195,7 +192,7 @@ private fun SearchBar(
             value = query,
             onValueChange = onQueryChange,
             singleLine = true,
-            textStyle = androidx.compose.ui.text.TextStyle(
+            textStyle = TextStyle(
                 color = Color.White,
                 fontSize = 18.sp
             ),
@@ -331,7 +328,6 @@ private fun RecentlyWatchedCard(
     }
 }
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun CategorySection(
     section: LibrarySection,
