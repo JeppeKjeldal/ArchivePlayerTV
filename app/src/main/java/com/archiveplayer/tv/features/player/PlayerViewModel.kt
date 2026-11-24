@@ -3,10 +3,11 @@
 package com.archiveplayer.tv.features.player
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
-import androidx.media3.common.util.Log
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -78,6 +79,18 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             .sslSocketFactory(sslContext.socketFactory, trustAllCertificates)
             .hostnameVerifier { _, _ -> true }
             .build()
+    }
+
+    private val playerListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (playbackState == Player.STATE_ENDED) {
+                playNextEpisode()
+            }
+        }
+    }
+
+    init {
+        exoPlayer.addListener(playerListener)
     }
 
     fun loadMedia(identifier: String) {
@@ -229,6 +242,15 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun playNextEpisode() {
+        val currentIndex = _episodes.value.indexOfFirst { it.fileName == _currentFileName.value }
+        if (currentIndex >= 0 && currentIndex < _episodes.value.size - 1) {
+            val nextEpisode = _episodes.value[currentIndex + 1]
+            _selectedSeason.value = nextEpisode.seasonNumber
+            playEpisode(nextEpisode.fileName, currentIdentifier)
+        }
+    }
+
     fun selectSeason(season: Int) {
         _selectedSeason.value = season
     }
@@ -263,6 +285,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         super.onCleared()
         saveProgress()
         progressSaveJob?.cancel()
+        exoPlayer.removeListener(playerListener)
         exoPlayer.release()
     }
 }
