@@ -42,7 +42,7 @@ fun AddToLibraryScreen(
                     val metadata = response.body() ?: emptyMap()
                     details = ArchiveDetails.fromMetadata(identifier, metadata)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             } finally {
                 isLoading = false
             }
