@@ -1,6 +1,5 @@
 package com.archiveplayer.tv.data.network
 
-import com.archiveplayer.tv.data.api.ApiService
 import com.archiveplayer.tv.data.archive.ArchiveApi
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -74,6 +73,5 @@ object RetrofitClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val apiService: ApiService = backendRetrofit.create(ApiService::class.java)
     val archiveApi: ArchiveApi = archiveRetrofit.create(ArchiveApi::class.java)
 }
