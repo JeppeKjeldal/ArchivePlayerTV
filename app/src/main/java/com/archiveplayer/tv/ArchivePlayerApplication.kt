@@ -5,6 +5,7 @@ import android.util.Log
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.archiveplayer.tv.data.local.AppDatabase
+import com.archiveplayer.tv.data.local.SettingsManager
 import com.archiveplayer.tv.data.repository.MediaRepository
 import com.archiveplayer.tv.data.network.RetrofitClient
 import com.archiveplayer.tv.data.tmdb.TmdbService
@@ -14,7 +15,7 @@ class ArchivePlayerApplication : Application(), ImageLoaderFactory {
     lateinit var mediaRepository: MediaRepository
         private set
 
-    lateinit var settingsManager: com.archiveplayer.tv.data.local.SettingsManager
+    lateinit var settingsManager: SettingsManager
         private set
 
     lateinit var tmdbService: TmdbService
@@ -27,11 +28,10 @@ class ArchivePlayerApplication : Application(), ImageLoaderFactory {
         val database = AppDatabase.getDatabase(this)
         mediaRepository = MediaRepository(
             mediaItemDao = database.mediaItemDao(),
-            watchProgressDao = database.watchProgressDao(),
             userProfileDao = database.userProfileDao()
         )
 
-        settingsManager = com.archiveplayer.tv.data.local.SettingsManager(this)
+        settingsManager = SettingsManager(this)
         tmdbService = TmdbService(this)
     }
 

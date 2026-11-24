@@ -22,15 +22,11 @@ class TmdbService(private val app: ArchivePlayerApplication) {
     private val tmdbApi: TmdbApi = retrofit.create(TmdbApi::class.java)
     private val imageBaseUrl = "https://image.tmdb.org/t/p/w500"
 
-    private val apiKey: String?
-        get() = app.settingsManager.tmdbApiKey
+    private val apiKey: String? get() = app.settingsManager.tmdbApiKey
 
     suspend fun findMatchAsync(title: String): TmdbMatchResult? {
-        val key = apiKey
-        if (key.isNullOrBlank()) {
-            Log.w("TMDB", "API Key not configured - skipping search")
-            return null
-        }
+        val key = apiKey ?: return null
+        if (key.isBlank()) return null
 
         val cleanedTitle = TitleCleaner.cleanForSearch(title)
         if (cleanedTitle.isBlank()) return null
@@ -51,11 +47,7 @@ class TmdbService(private val app: ArchivePlayerApplication) {
 
             val bestMatch = response.results.firstOrNull() ?: return null
 
-            val posterUrl = if (!bestMatch.posterPath.isNullOrEmpty()) {
-                "$imageBaseUrl${bestMatch.posterPath}"
-            } else {
-                null
-            }
+            val posterUrl = bestMatch.posterPath?.let { "$imageBaseUrl$it" }
 
             TmdbMatchResult(
                 tmdbId = bestMatch.id,
@@ -71,36 +63,31 @@ class TmdbService(private val app: ArchivePlayerApplication) {
 
     suspend fun fetchEpisodesAsync(tmdbId: Int): List<TmdbEpisodeInfo> {
         val key = apiKey ?: return emptyList()
-
         val episodes = mutableListOf<TmdbEpisodeInfo>()
 
         try {
             val show = tmdbApi.getTvDetails(tmdbId, key)
 
-            for (season in show.seasons) {
-                if (season.seasonNumber > 0) {
+            for ((seasonNumber) in show.seasons) {
+                if (seasonNumber > 0) {
                     try {
-                        val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, season.seasonNumber, key)
+                        val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, seasonNumber, key)
 
-                        for (ep in seasonDetails.episodes) {
-                            val stillUrl = if (!ep.stillPath.isNullOrEmpty()) {
-                                "$imageBaseUrl${ep.stillPath}"
-                            } else {
-                                null
-                            }
+                        for ((episodeNumber, name, stillPath, overview) in seasonDetails.episodes) {
+                            val stillUrl = stillPath?.let { "$imageBaseUrl$it" }
 
                             episodes.add(
                                 TmdbEpisodeInfo(
-                                    seasonNumber = season.seasonNumber,
-                                    episodeNumber = ep.episodeNumber,
-                                    name = ep.name,
+                                    seasonNumber = seasonNumber,
+                                    episodeNumber = episodeNumber,
+                                    name = name,
                                     stillUrl = stillUrl,
-                                    overview = ep.overview
+                                    overview = overview
                                 )
                             )
                         }
                     } catch (e: Exception) {
-                        Log.w("TMDB", "Failed to fetch season ${season.seasonNumber} for tmdbId: $tmdbId", e)
+                        Log.w("TMDB", "Failed to fetch season $seasonNumber for tmdbId: $tmdbId", e)
                     }
                 }
             }
