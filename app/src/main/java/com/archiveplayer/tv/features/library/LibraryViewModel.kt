@@ -64,11 +64,6 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun closeSearch() {
-        _isSearching.value = false
-        _searchQuery.value = ""
-    }
-
     private fun buildSections(
         recentlyWatched: List<MediaItemEntity>,
         items: List<MediaItemEntity>,
