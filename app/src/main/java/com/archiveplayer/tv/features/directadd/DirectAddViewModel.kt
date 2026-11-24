@@ -26,7 +26,7 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val app = application as ArchivePlayerApplication
 
-    private val _preview = MutableStateFlow<DirectAddPreview?>(null)
+    private val _preview = MutableStateFlow(null as DirectAddPreview?)
     val preview: StateFlow<DirectAddPreview?> = _preview.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -35,6 +35,7 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
     private val _isFetchingTmdb = MutableStateFlow(false)
     val isFetchingTmdb: StateFlow<Boolean> = _isFetchingTmdb.asStateFlow()
 
+    @Suppress("UNCHECKED_CAST")
     fun fetchMetadata(input: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -48,7 +49,7 @@ class DirectAddViewModel(application: Application) : AndroidViewModel(applicatio
             try {
                 val response = RetrofitClient.archiveApi.getMetadata(identifier)
                 if (response.isSuccessful) {
-                    val metadata = response.body() ?: emptyMap<String, Any>()
+                    val metadata = response.body() ?: emptyMap()
                     val meta = metadata["metadata"] as? Map<String, Any> ?: emptyMap()
 
                     val title = (meta["title"] as? String) ?: identifier
