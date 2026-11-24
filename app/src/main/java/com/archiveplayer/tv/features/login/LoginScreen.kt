@@ -24,7 +24,7 @@ fun LoginScreen(
     loginViewModel: LoginViewModel = viewModel(),
     onLoginSuccess: (String) -> Unit
 ) {
-    var profileName by remember { mutableStateOf("Gæst") }
+    var profileName by remember { mutableStateOf("Guest") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val focusRequester = remember { FocusRequester() }
@@ -32,7 +32,7 @@ fun LoginScreen(
     fun handleStart() {
         val name = profileName.trim()
         if (name.isBlank()) {
-            errorMessage = "Profilnavn må ikke være tomt"
+            errorMessage = "Profile name must not be empty"
             return
         }
 
@@ -62,7 +62,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Velkommen! Vælg et profilnavn.",
+                text = "Welcome! Choose a name for your profile",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.LightGray
             )
@@ -75,7 +75,7 @@ fun LoginScreen(
                     profileName = it
                     errorMessage = null
                 },
-                label = { Text("Profilnavn") },
+                label = { Text("Profile Name") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -104,7 +104,7 @@ fun LoginScreen(
                 onClick = { handleStart() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Start Afspilning")
+                Text("Start Playing")
             }
         }
     }

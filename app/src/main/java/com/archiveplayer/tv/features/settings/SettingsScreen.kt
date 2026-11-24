@@ -71,7 +71,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Indsæt din personlige TMDB API-nøgle for at hente film/serie-metadata. Du kan få en gratis nøgle på https://www.themoviedb.org/settings/api",
+            text = "Insert your personal TMDB API-key to get movie/show-metadata. You can get one for free at https://www.themoviedb.org/settings/api",
             fontSize = 14.sp,
             color = Color(0xFF9CA3AF)
         )
