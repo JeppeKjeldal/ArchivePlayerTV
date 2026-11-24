@@ -8,17 +8,16 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         MediaItemEntity::class,
-        WatchProgressEntity::class,
-        UserProfileEntity::class
+        UserProfileEntity::class,
+        WatchProgressEntity::class  // (hvis du har denne)
     ],
-    version = 1,
-    exportSchema = true
+    version = 2,  // RET: Opdater version fra 1 til 2
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun mediaItemDao(): MediaItemDao
-    abstract fun watchProgressDao(): WatchProgressDao
     abstract fun userProfileDao(): UserProfileDao
+    abstract fun watchProgressDao(): WatchProgressDao  // (hvis du har denne)
 
     companion object {
         @Volatile
@@ -30,7 +29,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "archive_player_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()  // NYT: Nulstil DB ved schema-ændring
+                    .build()
                 INSTANCE = instance
                 instance
             }

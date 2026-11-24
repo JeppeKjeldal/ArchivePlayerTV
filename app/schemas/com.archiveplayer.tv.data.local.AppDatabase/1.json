@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e916bdb141c862788006bc092a751c23",
+    "identityHash": "4e0389e561017ca1aef92a99e89b96be",
     "entities": [
       {
         "tableName": "media_items",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `archiveIdentifier` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `thumbnailUrl` TEXT NOT NULL, `categoryName` TEXT NOT NULL, `dateAdded` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `archiveIdentifier` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `thumbnailUrl` TEXT NOT NULL, `categoryName` TEXT NOT NULL, `watchProgressSeconds` INTEGER NOT NULL, `currentEpisodeFileName` TEXT, `lastWatched` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -45,8 +45,20 @@
             "notNull": true
           },
           {
-            "fieldPath": "dateAdded",
-            "columnName": "dateAdded",
+            "fieldPath": "watchProgressSeconds",
+            "columnName": "watchProgressSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentEpisodeFileName",
+            "columnName": "currentEpisodeFileName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastWatched",
+            "columnName": "lastWatched",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -128,7 +140,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e916bdb141c862788006bc092a751c23')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4e0389e561017ca1aef92a99e89b96be')"
     ]
   }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,10 +28,6 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.archiveplayer.tv.data.local.MediaItemEntity
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-
-// ... (andre imports)
 
 @Composable
 fun PlayerScreen(
@@ -46,11 +43,11 @@ fun PlayerScreen(
     val currentTitle by viewModel.title.collectAsState()
     val currentDescription by viewModel.description.collectAsState()
 
+    // RETTET: Sender kun identifier. ViewModel slår selv itemId op i databasen for at gemme progress.
     LaunchedEffect(mediaItem.archiveIdentifier) {
         viewModel.loadMedia(identifier = mediaItem.archiveIdentifier)
     }
 
-    // RETTET: Tilføjet verticalScroll herunder
     Column(
         modifier = Modifier
             .fillMaxSize()

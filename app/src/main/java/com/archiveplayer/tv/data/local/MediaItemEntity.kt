@@ -12,5 +12,8 @@ data class MediaItemEntity(
     val description: String?,
     val thumbnailUrl: String,
     val categoryName: String,
-    val dateAdded: Long = System.currentTimeMillis()
+    val watchProgressSeconds: Int = 0,
+    val currentEpisodeFileName: String? = null,
+    val lastWatched: Long = 0L,
+    val durationSeconds: Int = 0
 )

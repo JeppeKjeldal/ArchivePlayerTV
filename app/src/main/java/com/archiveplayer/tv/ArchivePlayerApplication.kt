@@ -15,7 +15,7 @@ class ArchivePlayerApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("AppInit", "ArchivePlayerApplication onCreate called") // <--- NY LINJE
+        Log.d("AppInit", "ArchivePlayerApplication onCreate called")
 
         val database = AppDatabase.getDatabase(this)
         mediaRepository = MediaRepository(
