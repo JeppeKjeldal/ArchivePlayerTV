@@ -11,6 +11,7 @@ data class ArchiveDetails(
     val allFiles: List<String>
 ) {
     companion object {
+        @Suppress("UNCHECKED_CAST")
         fun fromMetadata(identifier: String, metadata: Map<String, Any?>): ArchiveDetails {
             val title = (metadata["title"] as? String) ?: identifier
             val description = metadata["description"] as? String

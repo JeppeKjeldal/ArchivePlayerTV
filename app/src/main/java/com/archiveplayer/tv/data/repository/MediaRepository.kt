@@ -4,12 +4,10 @@ import com.archiveplayer.tv.data.local.MediaItemDao
 import com.archiveplayer.tv.data.local.MediaItemEntity
 import com.archiveplayer.tv.data.local.UserProfileDao
 import com.archiveplayer.tv.data.local.UserProfileEntity
-import com.archiveplayer.tv.data.local.WatchProgressDao
 import kotlinx.coroutines.flow.Flow
 
 class MediaRepository(
     private val mediaItemDao: MediaItemDao,
-    private val watchProgressDao: WatchProgressDao,
     private val userProfileDao: UserProfileDao
 ) {
     fun getAllMediaItems(): Flow<List<MediaItemEntity>> {
@@ -28,10 +26,6 @@ class MediaRepository(
         return mediaItemDao.getMediaItemByIdentifier(identifier)
     }
 
-    suspend fun getMediaItemById(id: Int): MediaItemEntity? {
-        return mediaItemDao.getMediaItemById(id)
-    }
-
     suspend fun updateWatchProgress(id: Int, progressSeconds: Int, episodeFileName: String?, lastWatched: Long) {
         mediaItemDao.updateWatchProgress(id, progressSeconds, episodeFileName, lastWatched)
     }
@@ -47,16 +41,5 @@ class MediaRepository(
 
     suspend fun updateDuration(id: Int, durationSeconds: Int) {
         mediaItemDao.updateDuration(id, durationSeconds)
-    }
-
-    suspend fun updateTmdbData(
-        id: Int,
-        tmdbId: Int?,
-        tmdbMediaType: String?,
-        tmdbPosterUrl: String?,
-        description: String?,
-        thumbnailUrl: String
-    ) {
-        mediaItemDao.updateTmdbData(id, tmdbId, tmdbMediaType, tmdbPosterUrl, description, thumbnailUrl)
     }
 }
