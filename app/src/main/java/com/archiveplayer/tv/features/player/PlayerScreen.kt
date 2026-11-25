@@ -46,6 +46,7 @@ import com.archiveplayer.tv.data.local.MediaItemEntity
 import kotlinx.coroutines.delay
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val CONTROLS_HIDE_DELAY_MS = 5_000L
 private const val SEEK_STEP_MS = 10_000L
@@ -141,12 +142,12 @@ fun PlayerScreen(
                 0L
             }
 
-            delay(500L)
+            delay(500.milliseconds)
         }
     }
 
     LaunchedEffect(uiState) {
-        delay(100L)
+        delay(100.milliseconds)
 
         when (uiState) {
             PlayerUiState.FULLSCREEN -> {
@@ -181,7 +182,7 @@ fun PlayerScreen(
 
     LaunchedEffect(uiState, interactionCounter) {
         if (uiState != PlayerUiState.FULLSCREEN) {
-            delay(CONTROLS_HIDE_DELAY_MS)
+            delay(CONTROLS_HIDE_DELAY_MS.milliseconds)
 
             uiState = PlayerUiState.FULLSCREEN
         }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.net.URLEncoder
 import java.util.regex.Pattern
+import kotlin.time.Duration.Companion.milliseconds
 
 data class Episode(
     val fileName: String,
@@ -60,7 +61,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private var currentIdentifier: String = ""
     private var progressSaveJob: Job? = null
 
-    // Standard, sikker OkHttpClient
     private val okHttpClient by lazy {
         OkHttpClient.Builder().build()
     }
@@ -90,7 +90,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                 val response = RetrofitClient.archiveApi.getMetadata(identifier)
                 if (response.isSuccessful) {
                     @Suppress("UNCHECKED_CAST")
-                    val metadata = response.body() as? Map<String, Any> ?: emptyMap()
+                    val metadata = response.body() ?: emptyMap()
                     @Suppress("UNCHECKED_CAST")
                     val meta = metadata["metadata"] as? Map<String, Any> ?: emptyMap()
 
@@ -138,7 +138,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                                     if (episodeOnlyMatcher.find()) {
                                         seasonNumber = 1
                                         episodeNumber = episodeOnlyMatcher.group(1)?.toIntOrNull() ?: (index + 1)
-                                        displayName = "Episode ${episodeNumber}"
+                                        displayName = "Episode $episodeNumber"
                                     }
                                 }
                             }
@@ -247,7 +247,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         progressSaveJob?.cancel()
         progressSaveJob = viewModelScope.launch {
             while (isActive) {
-                delay(10000)
+                delay(10000.milliseconds)
                 saveProgress()
             }
         }
