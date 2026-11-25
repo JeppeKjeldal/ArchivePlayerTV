@@ -80,13 +80,7 @@ fun LibraryScreen(
                     onClick = { libraryViewModel.toggleSearch() },
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    Text(if (isSearching) "Cancel" else "Search")
-                }
-                Button(
-                    onClick = onNavigateToSettings,
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Text("Settings")
+                    Text(if (isSearching) "Cancel" else "Library Search")
                 }
                 Button(
                     onClick = onNavigateToDirectAdd,
@@ -94,8 +88,16 @@ fun LibraryScreen(
                 ) {
                     Text("Direct URL")
                 }
-                Button(onClick = onNavigateToAddSource) {
-                    Text("Add Source")
+                Button(
+                    onClick = onNavigateToAddSource,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("Archive Search")
+                }
+                Button(
+                    onClick = onNavigateToSettings
+                ) {
+                    Text("API Settings")
                 }
             }
         }
