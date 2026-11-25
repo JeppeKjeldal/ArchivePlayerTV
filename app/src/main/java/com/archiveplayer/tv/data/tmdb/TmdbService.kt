@@ -13,7 +13,6 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 class TmdbService(private val app: ArchivePlayerApplication) {
-t
     private val json = Json { ignoreUnknownKeys = true }
     private val contentType = "application/json".toMediaType()
 
