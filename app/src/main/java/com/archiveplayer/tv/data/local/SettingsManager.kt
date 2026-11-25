@@ -2,6 +2,7 @@ package com.archiveplayer.tv.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit // <-- KTX extension import
 
 class SettingsManager(context: Context) {
 
@@ -17,7 +18,9 @@ class SettingsManager(context: Context) {
     var tmdbApiKey: String?
         get() = prefs.getString(KEY_TMDB_API_KEY, null)
         set(value) {
-            prefs.edit().putString(KEY_TMDB_API_KEY, value).apply()
+            prefs.edit {
+                putString(KEY_TMDB_API_KEY, value)
+            }
         }
 
     fun hasApiKey(): Boolean {
@@ -25,6 +28,8 @@ class SettingsManager(context: Context) {
     }
 
     fun clearApiKey() {
-        prefs.edit().remove(KEY_TMDB_API_KEY).apply()
+        prefs.edit {
+            remove(KEY_TMDB_API_KEY)
+        }
     }
 }
