@@ -1,9 +1,8 @@
-@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-
 package com.archiveplayer.tv.features.player
 
 import android.app.Application
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -21,12 +20,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import java.net.URLEncoder
-import java.security.cert.X509Certificate
 import java.util.regex.Pattern
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
 
 data class Episode(
     val fileName: String,
@@ -39,7 +35,6 @@ data class Episode(
     val overview: String? = null
 )
 
-@OptIn(UnstableApi::class)
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = application as ArchivePlayerApplication
@@ -65,20 +60,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private var currentIdentifier: String = ""
     private var progressSaveJob: Job? = null
 
-    private val lenientOkHttpClient by lazy {
-        val trustAllCertificates = object : X509TrustManager {
-            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-        }
-
-        val sslContext = SSLContext.getInstance("TLS")
-        sslContext.init(null, arrayOf<TrustManager>(trustAllCertificates), java.security.SecureRandom())
-
-        okhttp3.OkHttpClient.Builder()
-            .sslSocketFactory(sslContext.socketFactory, trustAllCertificates)
-            .hostnameVerifier { _, _ -> true }
-            .build()
+    // Standard, sikker OkHttpClient
+    private val okHttpClient by lazy {
+        OkHttpClient.Builder().build()
     }
 
     private val playerListener = object : Player.Listener {
@@ -105,12 +89,15 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             try {
                 val response = RetrofitClient.archiveApi.getMetadata(identifier)
                 if (response.isSuccessful) {
-                    val metadata = response.body() ?: emptyMap<String, Any>()
+                    @Suppress("UNCHECKED_CAST")
+                    val metadata = response.body() as? Map<String, Any> ?: emptyMap()
+                    @Suppress("UNCHECKED_CAST")
                     val meta = metadata["metadata"] as? Map<String, Any> ?: emptyMap()
 
                     _title.value = (meta["title"] as? String) ?: identifier
                     _description.value = (meta["description"] as? String) ?: "No description available."
 
+                    @Suppress("UNCHECKED_CAST")
                     val files = metadata["files"] as? List<Map<String, Any>> ?: emptyList()
 
                     val videoFiles = files.filter { file ->
@@ -204,7 +191,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("PlayerViewModel", "Error loading media", e)
                 _title.value = "Error loading media"
             }
 
@@ -212,6 +199,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    @OptIn(UnstableApi::class)
     fun playEpisode(fileName: String, identifier: String, startPositionMs: Long = 0L) {
         _currentFileName.value = fileName
         currentIdentifier = identifier
@@ -221,7 +209,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
         val videoUrl = "https://archive.org/download/$identifier/$encodedFileName"
 
-        val dataSourceFactory = OkHttpDataSource.Factory(lenientOkHttpClient)
+        val dataSourceFactory = OkHttpDataSource.Factory(okHttpClient)
         val mediaItem = MediaItem.Builder().setUri(videoUrl).build()
         val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
 

@@ -7,34 +7,15 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import java.security.cert.X509Certificate
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
 
 class TmdbService(private val app: ArchivePlayerApplication) {
+
     private val json = Json { ignoreUnknownKeys = true }
     private val contentType = "application/json".toMediaType()
 
-    private val lenientOkHttpClient by lazy {
-        val trustAllCertificates = object : X509TrustManager {
-            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-        }
-
-        val sslContext = SSLContext.getInstance("TLS")
-        sslContext.init(null, arrayOf<TrustManager>(trustAllCertificates), java.security.SecureRandom())
-
-        OkHttpClient.Builder()
-            .sslSocketFactory(sslContext.socketFactory, trustAllCertificates)
-            .hostnameVerifier { _, _ -> true }
-            .build()
-    }
-
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://api.themoviedb.org/3/")
-        .client(lenientOkHttpClient)
+        .client(OkHttpClient.Builder().build())
         .addConverterFactory(json.asConverterFactory(contentType))
         .build()
 
