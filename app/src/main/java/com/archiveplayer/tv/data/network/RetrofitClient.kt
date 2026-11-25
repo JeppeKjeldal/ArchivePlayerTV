@@ -8,17 +8,11 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.security.SecureRandom
-import java.security.cert.X509Certificate
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
 
-    private const val BACKEND_BASE_URL = "http://10.0.2.2:5000/"
     private const val ARCHIVE_BASE_URL = "https://archive.org/"
 
     private val cookieStore = ConcurrentHashMap<String, MutableList<Cookie>>()
@@ -38,33 +32,15 @@ object RetrofitClient {
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
-    private val unsafeTrustManager = object : X509TrustManager {
-        override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
-        override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
-        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-    }
-
-    private val sslContext = SSLContext.getInstance("TLS").apply {
-        init(null, arrayOf<TrustManager>(unsafeTrustManager), SecureRandom())
+        level = HttpLoggingInterceptor.Level.BASIC
     }
 
     val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .sslSocketFactory(sslContext.socketFactory, unsafeTrustManager)
-        .hostnameVerifier { _, _ -> true }
         .cookieJar(cookieJar)
         .addInterceptor(loggingInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
-        .build()
-
-    private val backendRetrofit = Retrofit.Builder()
-        .baseUrl(BACKEND_BASE_URL)
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     private val archiveRetrofit = Retrofit.Builder()
