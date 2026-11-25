@@ -67,26 +67,28 @@ class TmdbService(private val app: ArchivePlayerApplication) {
         try {
             val show = tmdbApi.getTvDetails(tmdbId, key)
 
-            for (season in show.seasons) {
-                if (season.seasonNumber > 0) {
+            // Destructuring declaration for season
+            for ((seasonNumber) in show.seasons) {
+                if (seasonNumber > 0) {
                     try {
-                        val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, season.seasonNumber, key)
+                        val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, seasonNumber, key)
 
-                        for (ep in seasonDetails.episodes) {
-                            val stillUrl = ep.stillPath?.let { "$imageBaseUrl$it" }
+                        // Destructuring declaration for episode
+                        for ((episodeNumber, name, stillPath, overview) in seasonDetails.episodes) {
+                            val stillUrl = stillPath?.let { "$imageBaseUrl$it" }
 
                             episodes.add(
                                 TmdbEpisodeInfo(
-                                    seasonNumber = season.seasonNumber,
-                                    episodeNumber = ep.episodeNumber,
-                                    name = ep.name,
+                                    seasonNumber = seasonNumber,
+                                    episodeNumber = episodeNumber,
+                                    name = name,
                                     stillUrl = stillUrl,
-                                    overview = ep.overview
+                                    overview = overview
                                 )
                             )
                         }
                     } catch (e: Exception) {
-                        Log.w("TMDB", "Failed to fetch season ${season.seasonNumber} for tmdbId: $tmdbId", e)
+                        Log.w("TMDB", "Failed to fetch season $seasonNumber for tmdbId: $tmdbId", e)
                     }
                 }
             }
