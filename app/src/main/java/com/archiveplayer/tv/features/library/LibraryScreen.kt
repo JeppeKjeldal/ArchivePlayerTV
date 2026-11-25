@@ -342,11 +342,11 @@ private fun CategorySection(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        FlowRow(
+        LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(end = 48.dp)
         ) {
-            section.items.forEach { item ->
+            items(section.items, key = { it.id }) { item ->
                 MediaCard(
                     item = item,
                     onClick = { onItemClicked(item.archiveIdentifier) }
