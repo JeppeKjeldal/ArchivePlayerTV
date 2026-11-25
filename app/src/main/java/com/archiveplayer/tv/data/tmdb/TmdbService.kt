@@ -7,15 +7,35 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 class TmdbService(private val app: ArchivePlayerApplication) {
-
+t
     private val json = Json { ignoreUnknownKeys = true }
     private val contentType = "application/json".toMediaType()
 
+    private val lenientOkHttpClient by lazy {
+        val trustAllCertificates = object : X509TrustManager {
+            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+        }
+
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, arrayOf<TrustManager>(trustAllCertificates), java.security.SecureRandom())
+
+        OkHttpClient.Builder()
+            .sslSocketFactory(sslContext.socketFactory, trustAllCertificates)
+            .hostnameVerifier { _, _ -> true }
+            .build()
+    }
+
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://api.themoviedb.org/3/")
-        .client(OkHttpClient.Builder().build())
+        .client(lenientOkHttpClient)
         .addConverterFactory(json.asConverterFactory(contentType))
         .build()
 
@@ -46,7 +66,6 @@ class TmdbService(private val app: ArchivePlayerApplication) {
             }
 
             val bestMatch = response.results.firstOrNull() ?: return null
-
             val posterUrl = bestMatch.posterPath?.let { "$imageBaseUrl$it" }
 
             TmdbMatchResult(
@@ -68,26 +87,26 @@ class TmdbService(private val app: ArchivePlayerApplication) {
         try {
             val show = tmdbApi.getTvDetails(tmdbId, key)
 
-            for ((seasonNumber) in show.seasons) {
-                if (seasonNumber > 0) {
+            for (season in show.seasons) {
+                if (season.seasonNumber > 0) {
                     try {
-                        val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, seasonNumber, key)
+                        val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, season.seasonNumber, key)
 
-                        for ((episodeNumber, name, stillPath, overview) in seasonDetails.episodes) {
-                            val stillUrl = stillPath?.let { "$imageBaseUrl$it" }
+                        for (ep in seasonDetails.episodes) {
+                            val stillUrl = ep.stillPath?.let { "$imageBaseUrl$it" }
 
                             episodes.add(
                                 TmdbEpisodeInfo(
-                                    seasonNumber = seasonNumber,
-                                    episodeNumber = episodeNumber,
-                                    name = name,
+                                    seasonNumber = season.seasonNumber,
+                                    episodeNumber = ep.episodeNumber,
+                                    name = ep.name,
                                     stillUrl = stillUrl,
-                                    overview = overview
+                                    overview = ep.overview
                                 )
                             )
                         }
                     } catch (e: Exception) {
-                        Log.w("TMDB", "Failed to fetch season $seasonNumber for tmdbId: $tmdbId", e)
+                        Log.w("TMDB", "Failed to fetch season ${season.seasonNumber} for tmdbId: $tmdbId", e)
                     }
                 }
             }
